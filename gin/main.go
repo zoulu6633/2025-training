@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"gin/database"
 	"net/http"
 	"time"
 
@@ -28,8 +29,6 @@ type Claims struct {
 	UserId int `json:"user_id"`
 	jwt.StandardClaims
 }
-
-var books = make(map[string]Book)
 
 const SecretKey = "666666"
 
@@ -117,18 +116,23 @@ func Login(c *gin.Context) {
 // @Param book body Book true "图书信息"
 // @Success 201 {object} Response "图书添加成功，Data为添加的图书信息"
 // @Failure 400 {object} Response "参数错误或图书已存在"
-// @Router /addbook [post]
+// @Router /book/add [post]
 func AddBook(c *gin.Context) {
 	var book Book
 	if err := c.ShouldBind(&book); err != nil {
 		c.JSON(http.StatusBadRequest, Response{Code: 400, Message: "参数解析失败", Data: err.Error()})
 		return
 	}
-	if _, exists := books[book.ID]; exists {
+	// 检查是否已存在
+	var exists Book
+	if err := database.DB.Where("id = ?", book.ID).First(&exists).Error; err == nil {
 		c.JSON(http.StatusBadRequest, Response{Code: 400, Message: "图书已存在", Data: nil})
 		return
 	}
-	books[book.ID] = book
+	if err := database.DB.Create(&book).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, Response{Code: 500, Message: "添加失败", Data: err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, Response{Code: 201, Message: "图书添加成功", Data: book})
 }
 
@@ -141,14 +145,18 @@ func AddBook(c *gin.Context) {
 // @Param id path string true "图书ID"
 // @Success 200 {object} Response "书籍删除成功"
 // @Failure 404 {object} Response "书籍不存在"
-// @Router /deletebook/{id} [delete]
+// @Router /book/delete/{id} [delete]
 func DeleteBook(c *gin.Context) {
 	id := c.Param("id")
-	if _, exists := books[id]; !exists {
+	var book Book
+	if err := database.DB.Where("id = ?", id).First(&book).Error; err != nil {
 		c.JSON(http.StatusNotFound, Response{Code: 404, Message: "书籍不存在"})
 		return
 	}
-	delete(books, id)
+	if err := database.DB.Delete(&book).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, Response{Code: 500, Message: "删除失败", Data: err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, Response{Code: 200, Message: "书籍删除成功"})
 }
 
@@ -163,24 +171,28 @@ func DeleteBook(c *gin.Context) {
 // @Success 200 {object} Response "图书更新成功，Data为更新后的图书信息"
 // @Failure 400 {object} Response "参数错误或ID不一致"
 // @Failure 404 {object} Response "图书未找到"
-// @Router /updatebook/{id} [put]
+// @Router /book/update/{id} [put]
 func UpdateBook(c *gin.Context) {
 	id := c.Param("id")
-	var book Book
-	if err := c.ShouldBind(&book); err != nil {
+	var newbook Book
+	var oldbook Book
+	if err := c.ShouldBind(&newbook); err != nil {
 		c.JSON(http.StatusBadRequest, Response{Code: 400, Message: "参数解析失败", Data: err.Error()})
 		return
 	}
-	if id != book.ID {
+	if id != newbook.ID {
 		c.JSON(http.StatusBadRequest, Response{Code: 400, Message: "路径ID与请求体 ID不一致", Data: nil})
 		return
 	}
-	if _, exists := books[book.ID]; !exists {
+	if err := database.DB.Where("id = ?", id).First(&oldbook).Error; err != nil {
 		c.JSON(http.StatusNotFound, Response{Code: 404, Message: "图书未找到", Data: nil})
 		return
 	}
-	books[book.ID] = book
-	c.JSON(http.StatusOK, Response{Code: 200, Message: "图书更新成功", Data: book})
+	if err := database.DB.Save(&newbook).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, Response{Code: 500, Message: "图书更新失败", Data: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, Response{Code: 200, Message: "图书更新成功", Data: newbook})
 }
 
 // SearchAllBook godoc
@@ -189,11 +201,12 @@ func UpdateBook(c *gin.Context) {
 // @Tags 图书管理
 // @Produce json
 // @Success 200 {object} Response "书籍列表获取成功，Data为Book数组"
-// @Router /searchbooks [get]
+// @Router /book/search [get]
 func SearchAllBook(c *gin.Context) {
 	var results []Book
-	for _, b := range books {
-		results = append(results, b)
+	if err := database.DB.Find(&results).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, Response{Code: 500, Message: "书籍获取失败", Data: err.Error()})
+		return
 	}
 	c.JSON(http.StatusOK, Response{Code: 200, Message: "书籍获取成功", Data: results})
 }
@@ -204,6 +217,8 @@ func SearchAllBook(c *gin.Context) {
 // @host localhost:8080
 // @BasePath /
 func main() {
+	database.InitGormDB()            // 数据库初始化
+	database.DB.AutoMigrate(&Book{}) // 自动建表
 	r := gin.Default()
 	r.POST("/login", Login)
 	book := r.Group("/book")

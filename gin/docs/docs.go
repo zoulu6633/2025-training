@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/addbook": {
+        "/book/add": {
             "post": {
                 "description": "添加一本新图书",
                 "consumes": [
@@ -55,7 +55,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/deletebook/{id}": {
+        "/book/delete/{id}": {
             "delete": {
                 "description": "根据ID删除图书",
                 "consumes": [
@@ -93,7 +93,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/searchbooks": {
+        "/book/search": {
             "get": {
                 "description": "获取所有图书信息",
                 "produces": [
@@ -113,7 +113,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/updatebook/{id}": {
+        "/book/update/{id}": {
             "put": {
                 "description": "根据ID更新图书信息",
                 "consumes": [
@@ -170,6 +170,12 @@ const docTemplate = `{
     "definitions": {
         "main.Book": {
             "type": "object",
+            "required": [
+                "author",
+                "id",
+                "stock",
+                "title"
+            ],
             "properties": {
                 "author": {
                     "type": "string"
