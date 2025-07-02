@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useRef, useEffect, useMemo } from 'react';
-
+import './App.css';
 const TodoContext = createContext();
 
 function todoReducer(state, action) {
@@ -73,7 +73,7 @@ export default function TodoApp() {
   }, []);
   return (
     <TodoContext.Provider value={{ todos, dispatch }}>
-      <div>
+      <div className='counter-container'>
         <h2>Todo List</h2>
         <TodoADD />
         <TodoList />
