@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: book
+    ports:
+      - "3307:3306"
+    restart: unless-stopped
+
+  gin-app:
+    build: .
+    container_name: gin-app
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      - mysql
