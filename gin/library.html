@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+  <title>图书馆管理系统</title>
+  <style>
+    body { background: #f5f7fa; color: #222; font-family: sans-serif; }
+    .container { max-width: 700px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 12px #0001; }
+    input, button { padding: 0.5rem; margin-right: 0.5rem; border-radius: 4px; border: 1px solid #ccc; }
+    input:focus { outline: 1.5px solid #1976d2; }
+    button { background: #1976d2; color: #fff; border: none; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #1565c0; }
+    table { width: 100%; background: #f0f4fa; border-radius: 6px; margin-top: 1rem; border-collapse: collapse; }
+    th, td { padding: 0.5rem; border-bottom: 1px solid #e0e0e0; }
+    th { background: #e3eaf6; }
+    tr:nth-child(even) { background: #f7fafd; }
+    .actions button { margin-right: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>图书馆管理系统</h2>
+    <div id="login-area">
+      <input type="text" id="user-id" placeholder="请输入用户ID">
+      <button onclick="login()">登录</button>
+    </div>
+    <div id="main-area" style="display:none;">
+      <div>
+        <span>已登录</span>
+        <button onclick="logout()">退出</button>
+      </div>
+      <form id="add-form" onsubmit="addBook(event)">
+        <input type="text" id="add-id" placeholder="ID" style="width:60px;">
+        <input type="text" id="add-title" placeholder="书名" style="width:120px;">
+        <input type="text" id="add-author" placeholder="作者" style="width:100px;">
+        <input type="text" id="add-stock" placeholder="库存" style="width:60px;">
+        <button type="submit">添加图书</button>
+      </form>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>书名</th><th>作者</th><th>库存</th><th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="book-list"></tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    let token = localStorage.getItem('token') || '';
+    let editId = null;
+
+    function showLogin(show) {
+      document.getElementById('login-area').style.display = show ? '' : 'none';
+      document.getElementById('main-area').style.display = show ? 'none' : '';
+    }
+
+    function login() {
+      const userId = document.getElementById('user-id').value;
+      if (!userId) return alert('请输入用户ID');
+      fetch('/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user_id: Number(userId) })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.token) {
+          token = data.token;
+          localStorage.setItem('token', token);
+          showLogin(false);
+          fetchBooks();
+        } else {
+          alert('登录失败');
+        }
+      });
+    }
+
+    function logout() {
+      token = '';
+      localStorage.removeItem('token');
+      showLogin(true);
+      document.getElementById('book-list').innerHTML = '';
+    }
+
+    function fetchBooks() {
+      fetch('/book/search', {
+        headers: { Authorization: token }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.code === 200) {
+          renderBooks(data.data);
+        } else {
+          alert(data.message || '获取失败');
+        }
+      });
+    }
+
+    function renderBooks(books) {
+      const tbody = document.getElementById('book-list');
+      tbody.innerHTML = '';
+      books.forEach(book => {
+        if (editId === book.id) {
+          tbody.innerHTML += `
+            <tr>
+              <td><input value="${book.id}" disabled style="width:50px;"></td>
+              <td><input id="edit-title" value="${book.title}" style="width:100px;"></td>
+              <td><input id="edit-author" value="${book.author}" style="width:80px;"></td>
+              <td><input id="edit-stock" value="${book.stock}" style="width:50px;"></td>
+              <td class="actions">
+                <button onclick="saveEdit('${book.id}')">保存</button>
+                <button onclick="cancelEdit()">取消</button>
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML += `
+            <tr>
+              <td>${book.id}</td>
+              <td>${book.title}</td>
+              <td>${book.author}</td>
+              <td>${book.stock}</td>
+              <td class="actions">
+                <button onclick="startEdit('${book.id}')">编辑</button>
+                <button onclick="deleteBook('${book.id}')">删除</button>
+              </td>
+            </tr>
+          `;
+        }
+      });
+    }
+
+    function addBook(e) {
+      e.preventDefault();
+      const id = document.getElementById('add-id').value;
+      const title = document.getElementById('add-title').value;
+      const author = document.getElementById('add-author').value;
+      const stock = document.getElementById('add-stock').value;
+      if (!id || !title || !author || !stock) return alert('请填写完整信息');
+      fetch('/book/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: token },
+        body: JSON.stringify({ id, title, author, stock })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.code === 201) {
+          alert('添加成功');
+          document.getElementById('add-form').reset();
+          fetchBooks();
+        } else {
+          alert(data.message || '添加失败');
+        }
+      });
+    }
+
+    function deleteBook(id) {
+      if (!confirm('确定删除吗？')) return;
+      fetch(`/book/delete/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: token }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.code === 200) {
+          alert('删除成功');
+          fetchBooks();
+        } else {
+          alert(data.message || '删除失败');
+        }
+      });
+    }
+
+    function startEdit(id) {
+      editId = id;
+      fetchBooks();
+    }
+
+    function cancelEdit() {
+      editId = null;
+      fetchBooks();
+    }
+
+    function saveEdit(id) {
+      const title = document.getElementById('edit-title').value;
+      const author = document.getElementById('edit-author').value;
+      const stock = document.getElementById('edit-stock').value;
+      fetch(`/book/update/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: token },
+        body: JSON.stringify({ id, title, author, stock })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.code === 200) {
+          alert('更新成功');
+          editId = null;
+          fetchBooks();
+        } else {
+          alert(data.message || '更新失败');
+        }
+      });
+    }
+
+    // 自动登录状态
+    if (token) {
+      showLogin(false);
+      fetchBooks();
+    }
+  </script>
+</body>
+</html>

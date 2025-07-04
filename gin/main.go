@@ -229,6 +229,9 @@ func main() {
 		book.PUT("/update/:id", UpdateBook)
 		book.GET("/search", SearchAllBook)
 	}
+	r.NoRoute(func(c *gin.Context) {
+		c.File("./library.html")
+	})
 	fmt.Println("服务启动于 http://localhost:8080")
 	r.Run(":8080")
 }
