@@ -1,0 +1,137 @@
+/* 页面背景和容器 */
+body, .page-content {
+  background: #f6f8fa;
+  font-family: "微软雅黑", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.product-table-container {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px #e0e6ed;
+  padding: 36px;
+  margin: 40px auto;
+}
+
+h2, h3 {
+  font-weight: 700;
+  color: #444;
+  margin-bottom: 18px;
+}
+
+input, select, textarea {
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #e0e6ed;
+  font-size: 15px;
+  background: #fff;
+  color: #222;
+  outline: none;
+  transition: border 0.2s;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+  border: 1.5px solid #5b86e5;
+}
+
+button, .edit-btn {
+  padding: 10px 32px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: background 0.2s;
+}
+
+button[type="submit"], .edit-btn {
+  background: linear-gradient(90deg, #36d1c4 0%, #5b86e5 100%);
+  color: #fff;
+}
+
+button[type="button"], .edit-btn.cancel {
+  background: #e0e6ed;
+  color: #333;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.status-badge.待处理 { background: #e0e6ed; color: #333; }
+.status-badge.已发货 { background: #36d1c4; color: #fff; }
+.status-badge.已完成 { background: #5b86e5; color: #fff; }
+.status-badge.已取消 { background: #e55b5b; color: #fff; }
+
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+}
+.product-table th, .product-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #e0e6ed;
+  text-align: left;
+}
+.product-table th {
+  background: #f6f8fa;
+  font-weight: 700;
+}
+
+ul, li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.address-list li {
+  background: #f6f8fa;
+  border-radius: 7px;
+  padding: 10px 16px;
+  font-size: 15px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.dialog-mask {
+  position: fixed;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.dialog-content {
+  background: #fff;
+  border-radius: 14px;
+  padding: 32px;
+  min-width: 320px;
+  box-shadow: 0 6px 32px #5b86e533;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.text-center { text-align: center; }
+.text-sm { font-size: 13px; color: #888; }
+.text-gray-500 { color: #888; }
+.mt-8 { margin-top: 8px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
