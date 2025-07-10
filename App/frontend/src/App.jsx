@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom'
 import './App.css'
 import './index.css';
+import './styles.css';
 import Products from './products.jsx';
 import Login from './login.jsx';
 import Register from './register.jsx';

@@ -23,20 +23,21 @@ type Products struct {
 	SellerID    int            `json:"seller_id"`
 	Seller      User           `json:"seller" gorm:"foreignKey:SellerID;references:UserID"`
 	Stock       int            `json:"stock"`
-	CategoryID  string         `gorm:"size:64;index" json:"c_id"`
-	Category    Category       `json:"category" gorm:"foreignKey:CategoryID;references:CID"`
+	CID         string         `gorm:"size:64;index" json:"c_id"`
+	Category    Category       `json:"category" gorm:"foreignKey:CID;references:CID"`
 	ImageURL    string         `json:"image_url"`
 	Images      []ProductImage `json:"images" gorm:"foreignKey:ProductID;references:ProductID"`
 	Description string         `json:"description"`
 }
 
 type ProductUpdateReq struct {
-	ProductID string `json:"product_id"`
-	Name      string `json:"name"`
-	Price     int    `json:"price"`
-	Stock     int    `json:"stock"`
-	CID       string `json:"c_id"`
-	ImageURL  string `json:"image_url"`
+	ProductID   string `json:"product_id"`
+	Name        string `json:"name"`
+	Price       int    `json:"price"`
+	Stock       int    `json:"stock"`
+	CID         string `json:"c_id"`
+	ImageURL    string `json:"image_url"`
+	Description string `json:"description"`
 }
 
 type Category struct {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "./api";
+import "./styles.css";
 
 const categories = [
   { c_id: "", c_name: "全部" },

@@ -51,7 +51,7 @@ func AddProduct(c *gin.Context) {
 		Name:        req.Name,
 		Price:       req.Price,
 		Stock:       req.Stock,
-		CategoryID:  req.CID,
+		CID:         req.CID,
 		ImageURL:    req.ImageURL,
 		SellerID:    uid,
 		Description: req.Description,
@@ -150,7 +150,7 @@ func SearchProductByCategory(c *gin.Context) {
 	cid := c.Param("c_id")
 	keyword := c.Query("keyword")
 	var products []database.Products
-	db := database.DB.Where("category_id = ?", cid)
+	db := database.DB.Where("c_id = ?", cid)
 	if keyword != "" {
 		db = db.Where("name LIKE ?", "%"+keyword+"%")
 	}

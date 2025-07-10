@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "./api";
+import "./styles.css";
 
 export default function Register() {
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [age, setAge] = useState("");
+  const [form, setForm] = useState({ username: "", password: "", email: "" });
   const [msg, setMsg] = useState("");
-  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,177 +17,53 @@ export default function Register() {
       const res = await fetch("http://localhost:8080/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          password,
-          email,
-          age: Number(age),
-        }),
+        body: JSON.stringify(form),
       });
       const response = await res.json();
       if (response.code === 200) {
-        setSuccess(true);
-        setMsg("注册成功，正在跳转到登录页...");
-        setTimeout(() => {
-          navigate("/login");
-        }, 1500); // 1.5秒后跳转
+        setMsg("注册成功，请登录");
+        setTimeout(() => navigate("/login"), 1000);
       } else {
         setMsg(response.message || "注册失败");
       }
-    } catch (err) {
+    } catch {
       setMsg("网络错误");
     }
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        left: 0,
-        top: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(0,0,0,0.18)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-      }}
-    >
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          background: "#fff",
-          borderRadius: 18,
-          padding: "40px 36px 32px 36px",
-          minWidth: 340,
-          boxShadow: "0 6px 32px #5b86e533",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <h2
-          style={{
-            margin: 0,
-            marginBottom: 28,
-            fontWeight: 700,
-            fontSize: 26,
-            color: "#5b86e5",
-            letterSpacing: 2,
-            textAlign: "center",
-          }}
-        >
-          用户注册
-        </h2>
+    <div className="register-modal">
+      <form className="register-form" onSubmit={handleSubmit}>
+        <h2>用户注册</h2>
+        {msg && <div className={msg.includes("失败") ? "msg-error" : "msg-success"}>{msg}</div>}
         <input
           type="text"
+          name="name"
           placeholder="用户名"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          style={{
-            width: "100%",
-            marginBottom: 18,
-            padding: "12px 14px",
-            fontSize: 16,
-            borderRadius: 8,
-            border: "1.5px solid #e0e6ed",
-            outline: "none",
-            transition: "border 0.2s",
-            boxSizing: "border-box",
-          }}
-          onFocus={(e) => (e.target.style.border = "1.5px solid #5b86e5")}
-          onBlur={(e) => (e.target.style.border = "1.5px solid #e0e6ed")}
+          value={form.name}
+          onChange={handleChange}
+          required
         />
         <input
           type="password"
+          name="password"
           placeholder="密码"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{
-            width: "100%",
-            marginBottom: 18,
-            padding: "12px 14px",
-            fontSize: 16,
-            borderRadius: 8,
-            border: "1.5px solid #e0e6ed",
-            outline: "none",
-            transition: "border 0.2s",
-            boxSizing: "border-box",
-          }}
-          onFocus={(e) => (e.target.style.border = "1.5px solid #5b86e5")}
-          onBlur={(e) => (e.target.style.border = "1.5px solid #e0e6ed")}
+          value={form.password}
+          onChange={handleChange}
+          required
         />
         <input
-          type="text"
-          placeholder="邮箱号"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            width: "100%",
-            marginBottom: 18,
-            padding: "12px 14px",
-            fontSize: 16,
-            borderRadius: 8,
-            border: "1.5px solid #e0e6ed",
-            outline: "none",
-            transition: "border 0.2s",
-            boxSizing: "border-box",
-          }}
-          onFocus={(e) => (e.target.style.border = "1.5px solid #5b86e5")}
-          onBlur={(e) => (e.target.style.border = "1.5px solid #e0e6ed")}
+          type="email"
+          name="email"
+          placeholder="邮箱"
+          value={form.email}
+          onChange={handleChange}
+          required
         />
-        <input
-          type="number"
-          placeholder="年龄"
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
-          style={{
-            width: "100%",
-            marginBottom: 18,
-            padding: "12px 14px",
-            fontSize: 16,
-            borderRadius: 8,
-            border: "1.5px solid #e0e6ed",
-            outline: "none",
-            transition: "border 0.2s",
-            boxSizing: "border-box",
-          }}
-          onFocus={(e) => (e.target.style.border = "1.5px solid #5b86e5")}
-          onBlur={(e) => (e.target.style.border = "1.5px solid #e0e6ed")}
-        />
-        {msg && (
-          <div
-            style={{
-              color: success ? "#27ae60" : "#e74c3c",
-              marginBottom: 12,
-              width: "100%",
-              textAlign: "center",
-            }}
-          >
-            {msg}
-          </div>
-        )}
-        <button
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "12px 0",
-            fontSize: 17,
-            background: "linear-gradient(90deg, #36d1c4 0%, #5b86e5 100%)",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            fontWeight: 600,
-            letterSpacing: 1,
-            marginBottom: 10,
-            cursor: "pointer",
-            transition: "background 0.2s",
-          }}
-          disabled={success}
-        >
-          注册
-        </button>
+        <button type="submit">注册</button>
+        <div className="to-login" onClick={() => navigate("/login")}>
+          已有账号？去登录
+        </div>
       </form>
     </div>
   );

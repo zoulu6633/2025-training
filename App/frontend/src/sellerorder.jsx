@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from './api.jsx';
+import "./styles.css";
 
 const statusMap = {
   pending: { label: '待处理', variant: 'secondary' },
@@ -81,13 +82,10 @@ useEffect(() => {
 
   return (
     <div className="page-content">
-      <div className="category-bar" style={{ visibility: "hidden" }}>
-        {/* 占位，保持与商品页一致 */}
-      </div>
+      <div className="category-bar" style={{ visibility: "hidden" }}></div>
       <div className="product-table-container">
         <h2>卖家订单管理</h2>
-        {msg && <div style={{ color: msg.includes("失败") ? "red" : "green", marginBottom: 16 }}>{msg}</div>}
-        
+        {msg && <div className={msg.includes("失败") ? "msg-error" : "msg-success"}>{msg}</div>}
         <table className="product-table">
           <thead>
             <tr>
@@ -145,93 +143,20 @@ useEffect(() => {
           </tbody>
         </table>
       </div>
-
-      {/* 编辑状态对话框 */}
       {isDialogOpen && (
-        <div
-          style={{
-            position: "fixed",
-            left: 0,
-            top: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.18)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          }}
-        >
-          <form
-            onSubmit={handleUpdateOrderStatus}
-            style={{
-              background: "#fff",
-              borderRadius: 14,
-              padding: "32px 32px 24px 32px",
-              minWidth: 340,
-              boxShadow: "0 6px 32px #5b86e533",
-              display: "flex",
-              flexDirection: "column",
-              gap: 18,
-              alignItems: "stretch",
-            }}
-          >
-            <h3 style={{
-              margin: 0,
-              marginBottom: 12,
-              fontWeight: 700,
-              fontSize: 22,
-              color: "#5b86e5",
-              textAlign: "center"
-            }}>修改订单状态</h3>
-            <select
-              name="status"
-              value={editStatus}
-              onChange={e => setEditStatus(e.target.value)}
-              required
-              style={{
-                padding: "10px 12px",
-                borderRadius: 7,
-                border: "1.5px solid #e0e6ed",
-                fontSize: 15,
-              }}
-            >
+        <div className="dialog-mask">
+          <form onSubmit={handleUpdateOrderStatus} className="dialog-content">
+            <h3 className="dialog-title">修改订单状态</h3>
+            <select name="status" value={editStatus} onChange={e => setEditStatus(e.target.value)} required className="form-input">
               <option value="">请选择状态</option>
               <option value="待处理">待处理</option>
               <option value="已发货">已发货</option>
               <option value="已完成">已完成</option>
               <option value="已取消">已取消</option>
             </select>
-            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-              <button
-                type="button"
-                onClick={() => setIsDialogOpen(false)}
-                style={{
-                  flex: 1,
-                  padding: "10px 0",
-                  borderRadius: 7,
-                  border: "none",
-                  background: "#e0e6ed",
-                  color: "#333",
-                  fontWeight: 600,
-                  fontSize: 16,
-                  cursor: "pointer"
-                }}
-              >取消</button>
-              <button
-                type="submit"
-                style={{
-                  flex: 1,
-                  padding: "10px 0",
-                  borderRadius: 7,
-                  border: "none",
-                  background: "linear-gradient(90deg, #36d1c4 0%, #5b86e5 100%)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  fontSize: 16,
-                  cursor: "pointer"
-                }}
-              >保存</button>
+            <div className="dialog-actions">
+              <button type="button" onClick={() => setIsDialogOpen(false)} className="btn-cancel">取消</button>
+              <button type="submit" className="btn-confirm">保存</button>
             </div>
           </form>
         </div>

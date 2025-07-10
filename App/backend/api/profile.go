@@ -146,11 +146,17 @@ func UpdatePassword(c *gin.Context) {
 		c.JSON(500, database.Response{Code: 500, Message: "用户不存在"})
 		return
 	}
-	if user.Password != req.OldPassword {
-		c.JSON(400, database.Response{Code: 400, Message: "原密码错误"})
+	if !CheckPassword(req.OldPassword, user.Password) {
+		c.JSON(http.StatusUnauthorized, database.Response{Code: 401, Message: "用户名或密码错误"})
 		return
 	}
-	if err := database.DB.Model(&user).Update("password", req.NewPassword).Error; err != nil {
+
+	hashedPassword, err := HashPassword(req.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, database.Response{Code: 500, Message: "无法处理密码"})
+		return
+	}
+	if err := database.DB.Model(&user).Update("password", hashedPassword).Error; err != nil {
 		c.JSON(500, database.Response{Code: 500, Message: "修改失败", Data: err.Error()})
 		return
 	}
