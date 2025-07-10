@@ -2,30 +2,12 @@ import React, { useState, useEffect } from 'react';
 import api from './api.jsx';
 import "./styles.css";
 
-const statusMap = {
-  pending: { label: '待处理', variant: 'secondary' },
-  confirmed: { label: '已确认', variant: 'default' },
-  shipped: { label: '已发货', variant: 'default' },
-  delivered: { label: '已送达', variant: 'default' },
-  cancelled: { label: '已取消', variant: 'destructive' }
-};
-
-const statusOptions = [
-  { value: '待处理', label: '待处理' },
-  { value: '已确认', label: '已确认' },
-  { value: '已发货', label: '已发货' },
-  { value: '已送达', label: '已送达' },
-  { value: '已取消', label: '已取消' }
-];
-
 
 export default function SellerOrders() {
   const [orders, setOrders] = useState([]);
   const [msg, setMsg] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [newStatus, setNewStatus] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditStatusDialogOpen, setIsEditStatusDialogOpen] = useState(false);
   const [editStatus, setEditStatus] = useState('');
 
 
@@ -49,20 +31,6 @@ useEffect(() => {
     return new Date(dateString).toLocaleString('zh-CN');
   };
 
-  const handleUpdateStatus = async () => {
-    if (!selectedOrder || !newStatus) return;
-
-    try {
-      await api.put(`/order/${selectedOrder.order_id}/status`, {
-        status: newStatus
-      });
-      setMsg("订单状态更新成功");
-      setIsDialogOpen(false);
-      fetchSellerOrders();
-    } catch (err) {
-      setMsg("更新失败：" + (err.response?.data?.message || err.message));
-    }
-  };
 
   const handleUpdateOrderStatus = async (e) => {
     e.preventDefault();
@@ -73,7 +41,7 @@ useEffect(() => {
         status: editStatus
       });
       setMsg("订单状态更新成功");
-      setIsEditStatusDialogOpen(false);
+      setIsDialogOpen(false);
       fetchSellerOrders();
     } catch (err) {
       setMsg("更新失败：" + (err.response?.data?.message || err.message));
@@ -122,7 +90,7 @@ useEffect(() => {
                   <td>{order.phone}</td>
                   <td>
                     <span className={`status-badge ${order.status}`}>
-                      {statusMap[order.status]?.label || order.status}
+                      {order.status}
                     </span>
                   </td>
                   <td>
@@ -130,7 +98,6 @@ useEffect(() => {
                       className="edit-btn"
                       onClick={() => {
                         setSelectedOrder(order);
-                        setNewStatus(order.status);
                         setIsDialogOpen(true);
                       }}
                     >
