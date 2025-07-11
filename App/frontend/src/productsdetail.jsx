@@ -96,7 +96,7 @@ export default function ProductDetail() {
               await api.post("/order/create", {
                 product_id: product.product_id,
                 quantity: buyQuantity,
-                address_id: selectedAddrId // 新增：带上地址id
+                address_id: selectedAddrId 
               });
               alert("下单成功！");
               setBuyDialogOpen(false);

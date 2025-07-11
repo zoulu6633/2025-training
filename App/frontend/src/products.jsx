@@ -45,7 +45,7 @@ export default function ProductList() {
             className={selected === cat.c_id ? "selected" : ""}
             onClick={() => {
               setSelected(cat.c_id);
-              setSearch(""); // 新增
+              setSearch(""); 
               fetchProducts(cat.c_id, "");
             }}
           >

@@ -13,7 +13,7 @@ func CreateOrder(c *gin.Context) {
 	var req struct {
 		ProductID string `json:"product_id"`
 		Quantity  int    `json:"quantity"`
-		AddressID uint   `json:"address_id"` // 新增：收货地址ID
+		AddressID uint   `json:"address_id"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, database.Response{Code: 400, Message: "请求参数错误", Data: err.Error()})

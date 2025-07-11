@@ -129,7 +129,6 @@ export default function MyProducts() {
     form.append("file", file);
     setUploading(true);
     try {
-      // 假设后端有 /upload 接口，返回 { url: "图片地址" }
       const res = await api.post("/upload", form, {
         headers: { "Content-Type": "multipart/form-data" }
       });
